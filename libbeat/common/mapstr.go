@@ -247,19 +247,17 @@ func AddTags(ms MapStr, tags []string) error {
 	if ms == nil || len(tags) == 0 {
 		return nil
 	}
-
-	tagsIfc, ok := ms[TagsKey]
-	if !ok {
-		ms[TagsKey] = tags
-		return nil
+	var existingTags []interface{}
+	if tagsIfc, ok := ms[TagsKey]; ok {
+		existingTags, ok = tagsIfc.([]interface{})
+		if !ok {
+			return errors.Errorf("expected interface{} array by type is %T", tagsIfc)
+		}
 	}
-
-	existingTags, ok := tagsIfc.([]string)
-	if !ok {
-		return errors.Errorf("expected string array by type is %T", tagsIfc)
+	for _, tag := range tags {
+		existingTags = append(existingTags, tag)
 	}
-
-	ms[TagsKey] = append(existingTags, tags...)
+	ms[TagsKey] = existingTags
 	return nil
 }
 
